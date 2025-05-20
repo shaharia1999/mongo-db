@@ -9,13 +9,28 @@ app.use(express.urlencoded({ extended: true })); // for application/x-www-form-u
 const productSchema = new mongoose.Schema({
   name: {
     type: String,
-    matchMedia:100,
-    trim: true,
+    matchMedia: 100,
+    trim: [true,'Name should not exceed 100 characters'],
     unique: true,
-    required: true,
+    required: [true, "Name is required"],
+    // enum:["laptop", "mobile", "tablet"],
+    // enum means the value of name should be one of the values in the array
+   validation:{
+    validator: function (v) {
+     return /^[a-zA-Z0-9_ ]+$/.test(v);
+
+    },
+    message: (props) => `${props.value} is not a valid name!`,
+   }
   },
   price: {
     type: Number || String,
+    required: true,
+  },
+  rating:{
+    type: Number,
+    min: 1,
+    max: 5,
     required: true,
   },
   description: {
@@ -52,8 +67,8 @@ app.get("/", (req, res) => {
 });
 // create product
 app.post("/products", async (req, res) => {
-  const { name, price, description } = req.body;
-  const product = new Product({ name, price, description });
+  const { name, price, description,rating } = req.body;
+  const product = new Product({ name, price, description ,rating});
   try {
     await product.save();
     res.status(201).send(product);
@@ -62,16 +77,36 @@ app.post("/products", async (req, res) => {
   }
 });
 // get all products
+// compare price with 59000 $gt, $lt, $gte, $lte ,$eq, $ne, $in, $nin, $exists, $regex, $where, $mod, $all, $elemMatch, $size.
+// logial operators $and, $or, $not, $nor {$and:[{price:{$lt:60000}},{name:/^a/}]}
+//  count =countDocuments() after the find
+//  sort = sort({price:1}) 1 for ascending and -1 for descending
+//  limit = limit(10) to limit the number of documents returned
+//  skip = skip(10) to skip the first 10 documents
+//  projection = select({name:1,price:1}) to select only the name and price fields
+
 app.get("/products", async (req, res) => {
   try {
-    const products = await Product.find().limit(20).sort({ createdAt: -1 });
-    if (products.length === 0) {
-      return res.status(404).send({ message: "No products found" });
-    } else if (products.length > 0) {
-      return res
-        .status(200)
-        .send({ message: "Products found", data: products });
+    const price = req.query.price;
+    // const products = await Product.find().limit(20).sort({ createdAt: -1 });
+    // const products = await Product.find({price:{$lt:60000}});
+    // const products = await Product.find({ price: { $lt: price } });
+    const products = await Product.find({$and:[{price:{$lte:price}},{rating:{$gt:3}}]});
+    if (price) {
+      if (products.length === 0) {
+        return res.status(404).send({ message: "No products found" });
+      } else if (products.length > 0) {
+        return res
+          .status(200)
+          .send({ message: "Products found", data: products });
+      } 
     }
+    else if (products) {
+        const products = await Product.find().limit(20).sort({ createdAt: -1 });
+        return res
+          .status(200)
+          .send({ message: "Products found", data: products });
+      }
   } catch (err) {
     res.status(500).send({ message: err.message });
   }
@@ -80,7 +115,7 @@ app.get("/products", async (req, res) => {
 app.get("/products/:id", async (req, res) => {
   const { id } = req.params;
   try {
-    const product = await Product.find({_id:id},{name:1});
+    const product = await Product.find({ _id: id }, { name: 1 });
     // const product = await Product.findById(id).select({name:1});
     if (!product) {
       return res.status(404).send({ message: "Product not found" });
