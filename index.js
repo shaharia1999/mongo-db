@@ -80,7 +80,8 @@ app.get("/products", async (req, res) => {
 app.get("/products/:id", async (req, res) => {
   const { id } = req.params;
   try {
-    const product = await Product.findById(id);
+    const product = await Product.find({_id:id},{name:1});
+    // const product = await Product.findById(id).select({name:1});
     if (!product) {
       return res.status(404).send({ message: "Product not found" });
     } else {
