@@ -1,13 +1,10 @@
 // app.js
 const express = require("express");
 const productRoutes = require("./routes/product.route");
+const applyCommonMiddleware = require("./middleware/commonMiddleware");
 const app = express();
-
 // Middleware
-// Middleware to parse JSON and URL-encoded data
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
+applyCommonMiddleware(app);
 // Routes
 app.use("/products", productRoutes);
 
@@ -15,5 +12,4 @@ app.use("/products", productRoutes);
 app.use((req, res) => {
   res.status(404).send({ message: "Not Found" });
 });
-
 module.exports = app; // 👈 Export app so server.js can use it
