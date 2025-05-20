@@ -3,6 +3,8 @@ const express = require("express");
 const productRoutes = require("./routes/product.route");
 const app = express();
 
+// Middleware
+// Middleware to parse JSON and URL-encoded data
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

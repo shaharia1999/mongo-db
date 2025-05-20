@@ -41,7 +41,11 @@ exports.getProductById = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id).select("name");
     if (!product) return res.status(404).send({ message: "Product not found" });
-    res.status(200).send({ message: "Product found", data: product });
+    res.status(200).send({
+      message: "Product found",
+      data: product,
+      visitCount: req.visitCount || 0, // Include visit count
+    });
   } catch (err) {
     res.status(500).send({ message: err.message });
   }
