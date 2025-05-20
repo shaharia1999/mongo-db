@@ -6,6 +6,7 @@ const port = 5000;
 app.use(express.json()); // for application/json
 app.use(express.urlencoded({ extended: true })); // for application/x-www-form-urlencoded
 // create product schema
+
 const productSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -58,10 +59,7 @@ async function connectDB() {
 }
 
 // Connect to DB first, then start server
-app.listen(port, async () => {
-  console.log(`Server is running on port ${port}`);
-  await connectDB();
-});
+
 app.get("/", (req, res) => {
   res.send("Hello World!");
 });
@@ -163,7 +161,15 @@ app.delete("/products/:id", async (req, res) => {
     res.status(500).send({ message: err.message });
   }
 });
-
+app.use((req, res, ) => {
+  res.send("<h1>404 Not Found</h1>");
+  res.status(404).send({ message: "Not Found" });
+}
+)
+app.listen(port, async () => {
+  console.log(`Server is running on port ${port}`);
+  await connectDB();
+});
 // app.post('./products',async(req,res)=>{
 // const {name,price,description}=req.body;
 // const product=new Product({name,price,description});
