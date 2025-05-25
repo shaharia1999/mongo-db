@@ -69,14 +69,14 @@ exports.forgotPassword = async (req, res) => {
       },
     });
 
-    await transporter.sendMail({
+    const result= await transporter.sendMail({
       to: user.email,
       subject: 'Reset Your Password',
       html: `<p>You requested a password reset.</p>
              <p>Click <a href="${resetLink}">here</a> to reset your password. This link will expire in 1 hour.</p>`,
     });
 
-    res.send({ message: 'Password reset email sent' });
+    res.send({ message: 'Password reset email sent',data:result });
   } catch (err) {
     res.status(500).send({ message: err.message });
   }
